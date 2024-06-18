@@ -4,21 +4,24 @@ import * as d3 from 'd3';
 const LineChart = ({ table }) => {
     const [data, setData] = useState([]);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await fetch(`http://10.250.66.171:5000/${table}/all`);
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                const jsonData = await response.json();
-                setData(jsonData);
-            } catch (error) {
-                console.error('Error fetching data:', error);
+    const fetchData = async () => {
+        try {
+            const response = await fetch(`http://10.250.66.171:5000/${table}/all`);
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
             }
-        };
+            const jsonData = await response.json();
+            setData(jsonData);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
 
-        fetchData();
+    useEffect(() => {
+        fetchData(); // Fetch data initially
+        const interval = setInterval(fetchData, 10000); // Fetch data every 10 seconds
+
+        return () => clearInterval(interval); // Cleanup interval on component unmount
     }, [table]);
 
     useEffect(() => {
@@ -30,7 +33,7 @@ const LineChart = ({ table }) => {
         const height = 400 - margin.top - margin.bottom;
 
         d3.select(`#chart-${table}`).selectAll('*').remove();
-        
+
         const svg = d3.select(`#chart-${table}`)
             .append('svg')
             .attr('width', width + margin.left + margin.right)
